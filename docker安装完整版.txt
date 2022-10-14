@@ -1,0 +1,169 @@
+﻿一 安装docker环境
+	虚拟机磁盘搞100G
+	1.安装需要的软件包
+		能上网 关闭防火墙
+		yum install lrzsz -y
+		sudo yum install -y yum-utils device-mapper-persistent-data lvm2
+	2.设置yum源为阿里云
+		sudo yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+	3.安装docker
+		sudo yum install docker-ce -y
+	4.安装后查看docker版本
+		docker -v
+	5.启动
+		systemctl start docker	
+	6.开机启动
+		systemctl enable docker	
+	7.查看镜像
+		docker images
+	8.查看运行的容器
+		docker ps					查看正在运行的容器		
+	9.docker cp 容器名称:容器目录 需要拷贝的文件或目录
+		例如: docker cp mycentos2:/usr/local/a.txt ./	
+二 docker安装redis
+	1.拉取镜像
+		docker load -i redis.tar
+		docker pull redis(慢)
+	2.创建容器
+		docker run -di --name=myredis -p 6389:6379 redis
+三 docker安装rabbitmq
+	1.拉取镜像
+		docker load -i rabbitmq.tar
+		docker pull rabbitmq:3.8.0
+	2.创建容器
+		docker run -di --name=myrabbit -p 15672:15672 -p 5672:5672 rabbitmq:3.8.0
+	3.启动UI支持
+		docker exec -it myrabbit /bin/bash
+		rabbitmq-plugins enable rabbitmq_management
+	4.创建用户(容器)
+		rabbitmqctl add_user admin 123
+		rabbitmqctl set_user_tags admin administrator
+		rabbitmqctl set_permissions -p "/" admin ".*" ".*" ".*"
+	5.安装延迟插件
+		docker cp rabbitmq_delayed_message_exchange-3.8.0.ez myrabbit:/plugins
+		rabbitmq-plugins enable rabbitmq_delayed_message_exchange(容器)
+四 安装elasticsearch
+	1.下载镜像
+		docker load -i elasticsearch.tar
+		docker pull docker.elastic.co/elasticsearch/elasticsearch:6.8.1(慢)
+	2.运行
+		docker run -d -p 9200:9200 -p 9300:9300 --name myes -e "ES_JAVA_OPTS=-Xms512m -Xmx512m" -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:6.8.1
+	3.进入es配置模式
+		docker exec -it myes  /bin/bash
+	4.启动/停止es容器
+		docker start myes
+		docker stop myes	
+	5.启动失败看日志
+		docker logs -f 73641dd5c7e8
+	6.删除容器
+		docker rm myes
+	7.访问地址
+		http://121.89.208.247:9200/	
+	8.所有容器
+		docker ps -a 
+五 kibana安装
+	1.下载镜像
+		docker load -i kibana.tar
+		docker pull docker.elastic.co/kibana/kibana:6.8.1(慢)
+	2.运行容器	
+		docker run -d --link myes:elasticsearch --name mykibana -p 5601:5601 docker.elastic.co/kibana/kibana:6.8.1
+	3.访问网址
+		http://121.89.208.247:5601	
+六 docker安装fastdfs
+	1.下载docker 镜像
+		docker load -i fastdfs.tar
+		docker pull delron/fastdfs(慢)
+	2.启动tracker服务
+		docker run -d --network=host --name tracker -v /home/tracker:/var/fdfs delron/fastdfs tracker
+	3.启动storage服务(注意修改ip地址)
+		docker run -d --network=host --name storage -e TRACKER_SERVER=192.168.11.51:22122 -v /home/storage:/var/fdfs -e GROUP_NAME=group1 delron/fastdfs storage
+	4.进入storage容器
+		docker exec -it storage  /bin/bash
+	5.安装vim编辑器(不用)
+		yum install vim -y
+	6.修改配置文件(不用)
+		vim /etc/fdfs/storage.conf 修改最后一行端口号(修改为80)
+		vim /usr/local/nginx/conf/nginx.conf 修改端口号为80
+	7.重启服务
+		exit
+		docker restart storage
+	8.测试图片是否能上传
+		选择一张照片上传到linux的software目录下
+		docker cp my.jpg storage:/tmp/nginx/nginx-1.12.2
+	9.重新进入容器执行文件上传
+		docker exec -it storage  /bin/bash
+		/usr/bin/fdfs_upload_file /etc/fdfs/client.conf my.jpg
+		exit
+	10.访问地址
+		http://121.89.208.247:8888/group1/M00/00/00/rBSs3WEVAPKEYA_HAAAAADcgn-E755.jpg
+	11.拷贝素材文件图片
+		data.zip文件拷贝到目录 /home/storage 解压
+		http://你的ip/group1/M00/00/00/rBSs3WEVAPKEYA_HAAAAADcgn-E755.jpg
+七 安装minio
+	1.学习文档
+		https://github.com/minio/minio
+		docker pull minio/minio
+		docker load -i minio.tar
+	2.创建容器
+docker run -d \
+-p 9000:9000 \
+-p 9001:9001 \
+-e "MINIO_ROOT_USER=enjoy6288" \
+-e "MINIO_ROOT_PASSWORD=enjoy6288" \
+-v /mnt/data:/data -v /mnt/config:/root/.minio \
+minio/minio server /data --console-address ":9001"	
+	3.访问
+		控制台地址
+			http://10.211.55.110:9000
+		图片访问
+			http://10.211.55.110:9000/java0722/4.jpg
+八 Docker Compose
+	1.目前遇到问题	
+		docker一个一个启动很费劲
+	2.官方文档
+		https://docs.docker.com/compose/install/
+		把docker-compose 复制到/usr/local/bin 相当于配置了环境变量
+		cp docker-compose /usr/local/bin/
+	3.修改docker-compose的权限
+		sudo chmod +x /usr/local/bin/docker-compose
+	4.启动与停止 
+		一键启动所有容器
+			docker-compose -f docker-compose.yml up 
+		一键启动所有容器
+			docker-compose -f docker-compose.yml down
+			还会一键删除所有的容器
+	5.记住rabbitmq安装完之后需要手动开启界面等
+		还需要验证fastdfs和minio
+		fastdfs 需要改ip地址 
+		docker exec -it fastdfs-storage  /bin/bash
+		/usr/bin/fdfs_upload_file /etc/fdfs/client.conf my.jpg
+九 安装nacos
+	1.上传并解压
+		https://nacos.io/zh-cn/docs/quick-start-docker.html	
+		unzip nacos-docker.zip
+		cd nacos-docker
+		docker-compose -f example/standalone-mysql-5.7.yaml up
+	2.访问地址
+		启动之后需要等一会儿
+		http://121.89.208.247:8848/nacos
+		账号密码都是nacos
+	3.固定ip地址	
+		/etc/sysconfig/network-scripts
+		替换文件ifcfg-ens33
+		systemctl restart network
+		
+十 系统配置
+	vim /etc/sysctl.conf
+	#配置转发
+	net.ipv4.ip_forward=1
+	#重启服务，让配置生效
+	systemctl restart network
+	sysctl net.ipv4.ip_forward 返回1为成功
+	
+	docker logs --tail=1000 shop-product
+	docker logs -f -t --tail 10 shop-product
+	http://192.168.15.218:8000/init/sku/bloom
+
+	yum install ntp ntpdate -y
+	ntpdate 0.asia.pool.ntp.org
+	systemctl enable ntpd
