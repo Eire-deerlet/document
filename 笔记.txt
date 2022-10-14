@@ -1,0 +1,25 @@
+入职后梳理公司的代码流程：
+
+1）从仓库拉取代码     确定好拉取master还是某个分支
+2）梳理出项目通常部分   
+       前后端参数和返回处理实体类（PageRequestDto，ResponseResult  AppHttpCodeEnum）
+       异常处理机制（业务异常类，全局异常处理类）
+       常用的工具类（Json转换，对象数据拷贝，加密解密工具类，时间处理类）
+3）以一个功能为主线追踪代码
+      增加商品
+            找出添加商品页面（xxx.html）
+            追踪页面发出后台请求
+            通过请求找出Controller
+           Service
+           Mapper
+           Pojo
+           表
+            
+globalcros
+routers:  
+    id
+    uri
+    predicates  
+    filters
+    
+      
