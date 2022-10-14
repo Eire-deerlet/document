@@ -17,7 +17,7 @@
 	7.查看镜像
 		docker images
 	8.查看运行的容器
-		docker ps					查看正在运行的容器		
+		docker ps					
 	9.docker cp 容器名称:容器目录 需要拷贝的文件或目录
 		例如: docker cp mycentos2:/usr/local/a.txt ./	
 二 docker安装redis
