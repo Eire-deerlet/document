@@ -1,0 +1,46 @@
+1.建立Git本地环境
+ git init 
+
+2.链接github
+git remote add origin https://github.com/Eire-deerlet/***
+
+3.添加代码到本地
+git add .
+
+4.添加注释
+git commit -m "代码注释"
+
+5.上传github
+git push origin master
+
+6.退代码版本
+
+	1 项目右键选择然后点击 show log
+
+	2 选中需要回退的代码版本
+
+	3.右键  选择“ Reset "master to this ”
+
+	4. 类型选择 “hard”，点击确定
+
+7.解决冲突
+	
+https://blog.csdn.net/qq_39437900/article/details/123065034
+
+看博客吧
+
+8.建立分支
+
+1.选择create Branch
+2.选择Switch/check out
+3.切换分支
+4.push
+https://blog.csdn.net/dong123ohyes/article/details/116990923
+还是看博客吧
+
+
+
+
+
+
+
